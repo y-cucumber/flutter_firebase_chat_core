@@ -465,4 +465,27 @@ class FirebaseChatCore {
           ),
         );
   }
+
+  /// Add a readyById in the Firestore.
+  void addReadBy(String roomId, String messageId, String userId) async {
+    await getFirebaseFirestore()
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .doc(messageId)
+        .collection('readBys')
+        .doc(userId)
+        .set({});
+  }
+
+  /// Get readyByIds in the Firestore.
+  void readBys(String roomId, String messageId) async {
+    await getFirebaseFirestore()
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .doc(messageId)
+        .collection('readBys')
+        .get();
+  }
 }
