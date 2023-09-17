@@ -493,4 +493,17 @@ class FirebaseChatCore {
     }
     return [];
   }
+
+  /// Get readyByIds in the Stream.
+  Stream<List<String>> readBysStream(String roomId, String messageId) =>
+      getFirebaseFirestore()
+          .collection(config.roomsCollectionName)
+          .doc(roomId)
+          .collection('messages')
+          .doc(messageId)
+          .collection('readBys')
+          .snapshots()
+          .map(
+            (event) => event.docs.map((e) => e.id).toList(),
+          );
 }
