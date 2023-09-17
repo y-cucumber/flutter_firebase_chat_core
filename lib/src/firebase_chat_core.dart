@@ -478,13 +478,19 @@ class FirebaseChatCore {
   }
 
   /// Get readyByIds in the Firestore.
-  void readBys(String roomId, String messageId) async {
-    await getFirebaseFirestore()
+  Future<List<String>> readBys(String roomId, String messageId) async {
+    final messageReadBys = await getFirebaseFirestore()
         .collection(config.roomsCollectionName)
         .doc(roomId)
         .collection('messages')
         .doc(messageId)
         .collection('readBys')
         .get();
+
+    final data = messageReadBys.docs;
+    if (data.isNotEmpty) {
+      return data.map((e) => e.id).toList();
+    }
+    return [];
   }
 }
