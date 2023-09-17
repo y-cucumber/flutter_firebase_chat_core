@@ -423,7 +423,6 @@ class FirebaseChatCore {
 
       messageMap.removeWhere((key, value) =>
           key == 'author' ||
-          key == 'createdAt' ||
           key == 'id' ||
           key == 'updatedAt');
 
