@@ -428,7 +428,12 @@ class FirebaseChatCore {
 
       messageMap['authorId'] = m.author.id;
 
+      final createdAt = messageMap['createdAt'];
+      if(createdAt != null) {
+        messageMap['createdAt'] = Timestamp.fromDate(DateTime.fromMillisecondsSinceEpoch(createdAt));
+      }
       return messageMap;
+      
     }).toList();
     roomMap['updatedAt'] = FieldValue.serverTimestamp();
     roomMap['userIds'] = room.users.map((u) => u.id).toList();
