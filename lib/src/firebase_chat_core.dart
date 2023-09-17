@@ -387,7 +387,6 @@ class FirebaseChatCore {
   /// room ID. Message will probably be taken from the [messages] stream.
   void updateMessage(types.Message message, String roomId) async {
     if (firebaseUser == null) return;
-    if (message.author.id != firebaseUser!.uid) return;
 
     final messageMap = message.toJson();
     messageMap.removeWhere(
@@ -424,13 +423,17 @@ class FirebaseChatCore {
 
       messageMap.removeWhere((key, value) =>
           key == 'author' ||
-          key == 'createdAt' ||
           key == 'id' ||
           key == 'updatedAt');
 
       messageMap['authorId'] = m.author.id;
 
+      final createdAt = messageMap['createdAt'];
+      if(createdAt != null) {
+        messageMap['createdAt'] = Timestamp.fromDate(DateTime.fromMillisecondsSinceEpoch(createdAt));
+      }
       return messageMap;
+      
     }).toList();
     roomMap['updatedAt'] = FieldValue.serverTimestamp();
     roomMap['userIds'] = room.users.map((u) => u.id).toList();
@@ -465,4 +468,46 @@ class FirebaseChatCore {
           ),
         );
   }
+
+  /// Add a readyById in the Firestore.
+  void addReadBy(String roomId, String messageId, String userId) async {
+    await getFirebaseFirestore()
+        .collection(config.roomsCollectionName)
+        .doc(roomId)
+        .collection('messages')
+        .doc(messageId)
+        .collection('readBys')
+        .doc(userId)
+        .set({});
+  }
+
+  /// Get readyByIds in the Firestore.
+  Future<List<String>> readBys(String roomId, String messageId) async {
+    final messageReadBys = await getFirebaseFirestore()
+        .collection(config.roomsCollectionName)
+        .doc(roomId)
+        .collection('messages')
+        .doc(messageId)
+        .collection('readBys')
+        .get();
+
+    final data = messageReadBys.docs;
+    if (data.isNotEmpty) {
+      return data.map((e) => e.id).toList();
+    }
+    return [];
+  }
+
+  /// Get readyByIds in the Stream.
+  Stream<List<String>> readBysStream(String roomId, String messageId) =>
+      getFirebaseFirestore()
+          .collection(config.roomsCollectionName)
+          .doc(roomId)
+          .collection('messages')
+          .doc(messageId)
+          .collection('readBys')
+          .snapshots()
+          .map(
+            (event) => event.docs.map((e) => e.id).toList(),
+          );
 }
