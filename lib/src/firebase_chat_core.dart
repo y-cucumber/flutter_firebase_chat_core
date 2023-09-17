@@ -387,7 +387,6 @@ class FirebaseChatCore {
   /// room ID. Message will probably be taken from the [messages] stream.
   void updateMessage(types.Message message, String roomId) async {
     if (firebaseUser == null) return;
-    if (message.author.id != firebaseUser!.uid) return;
 
     final messageMap = message.toJson();
     messageMap.removeWhere(
@@ -469,7 +468,7 @@ class FirebaseChatCore {
   /// Add a readyById in the Firestore.
   void addReadBy(String roomId, String messageId, String userId) async {
     await getFirebaseFirestore()
-        .collection('rooms')
+        .collection(config.roomsCollectionName)
         .doc(roomId)
         .collection('messages')
         .doc(messageId)
@@ -481,7 +480,7 @@ class FirebaseChatCore {
   /// Get readyByIds in the Firestore.
   void readBys(String roomId, String messageId) async {
     await getFirebaseFirestore()
-        .collection('rooms')
+        .collection(config.roomsCollectionName)
         .doc(roomId)
         .collection('messages')
         .doc(messageId)
